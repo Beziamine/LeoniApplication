@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/back5"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/bt1"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="120dp"
+        android:src="@drawable/k21"
+        app:civ_border_color="#B1B1B1"
+        app:civ_border_width="2dp"
+        android:layout_gravity="center"/>
+
+
+    <TextView
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/modern_button"
+        android:drawablePadding="8dp"
+        android:ems="10"
+        android:text="DATA KABA"
+        android:padding="14dp"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textAlignment="center"/>
+
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/bt2"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="70dp"
+        android:src="@drawable/stat_icon2"
+        app:civ_border_color="#B1B1B1"
+        app:civ_border_width="2dp"
+        android:layout_gravity="center"/>
+
+
+    <TextView
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/modern_button"
+        android:drawablePadding="8dp"
+        android:ems="10"
+        android:text="STATISTICS"
+        android:padding="14dp"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textAlignment="center"/>
+
+
+
+
+</LinearLayout>
