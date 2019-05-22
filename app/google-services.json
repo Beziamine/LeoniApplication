@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "121713352089-9rl11cinp5n4gtvcuffr9fk90j739r89.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bezi.leoniapplication",
+            "certificate_hash": "88a1343cb74f667efe129fcb3aaa56f743815838"
+          }
+        },
+        {
           "client_id": "121713352089-m55k730j9ned107smth4cv0o5ugvq3of.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

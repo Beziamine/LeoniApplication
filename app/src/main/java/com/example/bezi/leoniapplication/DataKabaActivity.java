@@ -1,5 +1,6 @@
 package com.example.bezi.leoniapplication;
 
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +11,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -19,16 +22,22 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Calendar;
+
 public class DataKabaActivity extends AppCompatActivity {
 
     private Button btn ;
-    private EditText LAD , poste , component ;
+    private EditText LAD , poste , component , Date  ;
 
     private DatabaseReference SensorRef;
 
+    private ImageButton DatePick;
+    private DatePickerDialog datePickerDialog;
+    private Calendar calendar;
+
     public static final String TAG = "DataKabaActivity";
 
-    Integer itr;
+    Integer itr,nbr,testD;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +50,47 @@ public class DataKabaActivity extends AppCompatActivity {
         LAD = (EditText)findViewById(R.id.editText);
         poste = (EditText)findViewById(R.id.editText2);
         component = (EditText)findViewById(R.id.editText3);
+        Date = (EditText)findViewById(R.id.editText6);
+
+        DatePick = (ImageButton)findViewById(R.id.date_picker);
+
+        DatePick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                calendar = Calendar.getInstance();
+
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
+                int month = calendar.get(Calendar.MONTH);
+                int year = calendar.get(Calendar.YEAR);
+
+                datePickerDialog = new DatePickerDialog(DataKabaActivity.this, new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int mYear, int mMonth, int mDay) {
+
+                        if ((mMonth+1<10) && (mDay<10)){
+                            Date.setText(mYear + "-0" + (mMonth + 1)+ "-0" + mDay);
+
+                        }else if ((mMonth+1>9) && (mDay<10)){
+                            Date.setText(mYear + "-" + (mMonth + 1)+ "-0" + mDay);
+
+                        }else if ((mMonth+1<10) && (mDay>9)){
+                            Date.setText(mYear + "-0" + (mMonth + 1)+ "-" + mDay);
+
+                        }else {
+                            Date.setText(mYear + "-" + (mMonth + 1)+ "-" + mDay);
+
+                        }
+                    }
+                },day,month,year);
+
+                datePickerDialog.show();
+            }
+        });
 
 
         btn.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View view) {
 
@@ -59,69 +106,95 @@ public class DataKabaActivity extends AppCompatActivity {
                 {
                     Toast.makeText(DataKabaActivity.this, "Please insert the component !", Toast.LENGTH_SHORT).show();
                 }
+                if(TextUtils.isEmpty(Date.getText().toString()))
+                {
+                    Toast.makeText(DataKabaActivity.this, "Please insert the Date !", Toast.LENGTH_SHORT).show();
+                }
+
                 else
                 {
 
                     itr = 0;
+                    nbr = 0;
+                    testD = 0;
 
-                    SensorRef.addValueEventListener(new ValueEventListener() {
+
+                    SensorRef.orderByChild("Date").addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                             if(dataSnapshot.exists()){
 
-                                for (DataSnapshot childSnapshot: dataSnapshot.getChildren()){
+
+                                for (DataSnapshot childSnapshot: dataSnapshot.getChildren()) {
 
 
-                                    itr ++;
-
-                                    String key = childSnapshot.getKey();
+                                    final String key = childSnapshot.getKey();
 
                                     String testlad = dataSnapshot.child(key).child("lad").getValue().toString();
                                     String testposte = dataSnapshot.child(key).child("poste").getValue().toString();
                                     String testcomponent = dataSnapshot.child(key).child("component").getValue().toString();
+                                    String testDate = dataSnapshot.child(key).child("Date").getValue().toString();
 
-                                    if(testlad.equals(LAD.getText().toString())&&(testposte.equals(poste.getText().toString())&&(testcomponent.equals(component.getText().toString())))){
+                                    if(testlad.equals(LAD.getText().toString())&&(testposte.equals(poste.getText().toString())&&(testcomponent.equals(component.getText().toString()))&&(testDate.equals(Date.getText().toString()))))
+
+                                    nbr++;
+
+                                    }
+
+                                for (DataSnapshot childSnapshot: dataSnapshot.getChildren()){
+
+                                    itr++;
+
+                                    final String key = childSnapshot.getKey();
 
 
-                                        Intent i = new Intent(DataKabaActivity.this,ShowDataKabaActivity.class);
+                                    String testlad = dataSnapshot.child(key).child("lad").getValue().toString();
+                                    String testposte = dataSnapshot.child(key).child("poste").getValue().toString();
+                                    String testcomponent = dataSnapshot.child(key).child("component").getValue().toString();
+                                    String testDate = dataSnapshot.child(key).child("Date").getValue().toString();
+
+
+                                    if(testlad.equals(LAD.getText().toString())&&(testposte.equals(poste.getText().toString())&&(testcomponent.equals(component.getText().toString()))&&(testDate.equals(Date.getText().toString())))){
+
+                                        testD++;
+                                        final Intent i = new Intent(DataKabaActivity.this,ShowDataKabaActivity.class);
 
                                         i.putExtra("val1",LAD.getText().toString());
                                         i.putExtra("val2",poste.getText().toString());
                                         i.putExtra("val3",component.getText().toString());
                                         i.putExtra("val4",dataSnapshot.child(key).child("nbre_pieces").getValue().toString());
                                         i.putExtra("val5",dataSnapshot.child(key).child("variante").getValue().toString());
-                                        i.putExtra("val6",dataSnapshot.child(key).child("Date").getValue().toString()+" "+
-                                                dataSnapshot.child(key).child("Time").getValue().toString());
+                                        i.putExtra("val6",Date.getText().toString());
+                                        i.putExtra("val7",dataSnapshot.child(key).child("Time").getValue().toString());
 
-                                        startActivity(i);
-                                        break;
-                                    }
+                                        if (testD == nbr) {
+                                            startActivity(i);
+                                            break;
+                                        }
 
-                                    else {
+
+                                    }   else {
 
                                         if(itr == dataSnapshot.getChildrenCount())
 
-                                        Toast.makeText(DataKabaActivity.this, "Please verify data !", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(DataKabaActivity.this, "Please verify data !", Toast.LENGTH_SHORT).show();
 
                                     }
 
-
-
                                 }
-
                             }
+
+
                         }
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
 
                         }
-                    });
 
 
-
-            }}
+                    });}}
         });
 
     }

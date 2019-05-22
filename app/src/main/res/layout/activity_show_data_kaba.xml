@@ -13,12 +13,44 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="120dp">
+        android:layout_marginTop="110dp">
 
         <ImageButton
             android:layout_width="100dp"
             android:layout_height="50dp"
             android:src="@drawable/ic_date_range_black_24dp"
+            android:background="@drawable/modern_button"
+            android:layout_marginLeft="30dp" />
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="40dp"
+            android:background="@drawable/modern_input"
+            android:drawablePadding="8dp"
+            android:ems="10"
+            android:hint="date"
+            android:textAlignment="center"
+            android:inputType="text"
+            android:padding="12dp"
+            android:textColor="@android:color/black"
+            android:textStyle="normal"
+            android:textSize="18sp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="30dp">
+
+        <ImageButton
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_access_time_black_24dp"
             android:background="@drawable/modern_button"
             android:layout_marginLeft="30dp" />
 
@@ -41,27 +73,28 @@
 
     </LinearLayout>
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="30dp">
 
-    <TextView
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginLeft="30dp"
-        android:background="@drawable/modern_button"
-        android:drawablePadding="8dp"
-        android:ems="10"
-        android:text="LAD"
-        android:textAlignment="center"
-        android:inputType="text"
-        android:padding="12dp"
-        android:textColor="@android:color/black"
-        android:textStyle="normal"
-        android:textSize="18sp"/>
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="30dp"
+            android:background="@drawable/modern_button"
+            android:drawablePadding="8dp"
+            android:ems="10"
+            android:text="LAD"
+            android:textAlignment="center"
+            android:inputType="text"
+            android:padding="12dp"
+            android:textColor="@android:color/black"
+            android:textStyle="normal"
+            android:textSize="18sp"/>
 
         <TextView
             android:id="@+id/lad"
@@ -233,6 +266,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginLeft="40dp"
+
             android:background="@drawable/modern_input"
             android:drawablePadding="8dp"
             android:ems="10"
