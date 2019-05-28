@@ -1,10 +1,17 @@
 package com.example.bezi.leoniapplication;
 
 import android.app.DatePickerDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -23,13 +30,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class DataKabaActivity extends AppCompatActivity {
 
     private Button btn ;
     private EditText LAD , poste , component , Date  ;
 
-    private DatabaseReference SensorRef;
+    private DatabaseReference SensorRef,SensorRefNotif;
 
     private ImageButton DatePick;
     private DatePickerDialog datePickerDialog;
@@ -39,12 +49,21 @@ public class DataKabaActivity extends AppCompatActivity {
 
     Integer itr,nbr,testD;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_data_kaba);
 
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            NotificationChannel channel = new NotificationChannel("Chanel_ID","Channel_Name",NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription("Channel_Desc");
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+        }
+
         SensorRef = FirebaseDatabase.getInstance().getReference().child("MyTestData");
+        SensorRefNotif = FirebaseDatabase.getInstance().getReference().child("MyTestData");
 
         btn = (Button)findViewById(R.id.btn);
         LAD = (EditText)findViewById(R.id.editText);
@@ -167,6 +186,14 @@ public class DataKabaActivity extends AppCompatActivity {
                                         i.putExtra("val5",dataSnapshot.child(key).child("variante").getValue().toString());
                                         i.putExtra("val6",Date.getText().toString());
                                         i.putExtra("val7",dataSnapshot.child(key).child("Time").getValue().toString());
+                                        String testTime = dataSnapshot.child(key).child("Time").getValue().toString();
+
+                                       if (Float.valueOf(dataSnapshot.child(key).child("nbre_pieces").getValue().toString())<16 && testD == nbr) {
+                                           String title = "Alerte LAD: "+ testlad+ " / Poste: "+ testposte+ " / "+testTime;
+                                           String message = testcomponent + " en manque de pièces !!";
+                                           createNotification(title, message);
+                                       }
+
 
                                         if (testD == nbr) {
                                             startActivity(i);
@@ -197,5 +224,63 @@ public class DataKabaActivity extends AppCompatActivity {
                     });}}
         });
 
+
+
+        SensorRefNotif.orderByChild("Date").limitToLast(1).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if(dataSnapshot.exists()){
+
+
+                    for (DataSnapshot childSnapshot: dataSnapshot.getChildren()) {
+
+                        final String key = childSnapshot.getKey();
+
+                        String testlad = dataSnapshot.child(key).child("lad").getValue().toString();
+                        String testposte = dataSnapshot.child(key).child("poste").getValue().toString();
+                        String testcomponent = dataSnapshot.child(key).child("component").getValue().toString();
+                        String testDate = dataSnapshot.child(key).child("Date").getValue().toString();
+                        String testTime = dataSnapshot.child(key).child("Time").getValue().toString();
+
+                        if (Float.valueOf(dataSnapshot.child(key).child("nbre_pieces").getValue().toString())<16) {
+                            String title = "Alerte LAD: "+ testlad+ " / Poste: "+ testposte+ " / "+testTime;
+                            String message = testcomponent + " en manque de pièces !!";
+                            createNotification(title, message);
+                        }
+                    }
+
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+
+
+        });
+
+
+
+
     }
+
+    public void createNotification(String title, String message) {
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this,"Chanel_ID")
+                .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(1, builder.build());
+
+    }
+
+
+
 }
