@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -17,18 +18,21 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +43,7 @@ public class DataKabaActivity extends AppCompatActivity {
     private Button btn ;
     private EditText LAD , poste , component , Date  ;
 
-    private DatabaseReference SensorRef,SensorRefNotif;
+    private DatabaseReference SensorRef,SensorRefNotif,NotifRef;
 
     private ImageButton DatePick;
     private DatePickerDialog datePickerDialog;
@@ -47,7 +51,16 @@ public class DataKabaActivity extends AppCompatActivity {
 
     public static final String TAG = "DataKabaActivity";
 
+    private Model model;
+    private ArrayAdapter<Model> adapter;
+    private ArrayList<Model> arraylist;
+
     Integer itr,nbr,testD;
+
+    private int k,size;
+
+    private String title,message;
+
 
 
     @Override
@@ -64,6 +77,11 @@ public class DataKabaActivity extends AppCompatActivity {
 
         SensorRef = FirebaseDatabase.getInstance().getReference().child("MyTestData");
         SensorRefNotif = FirebaseDatabase.getInstance().getReference().child("MyTestData");
+        NotifRef = FirebaseDatabase.getInstance().getReference();
+
+        model = new Model();
+        arraylist = new ArrayList<>();
+        adapter = new ArrayAdapter<Model>(this, android.R.layout.simple_list_item_1, arraylist);
 
         btn = (Button)findViewById(R.id.btn);
         LAD = (EditText)findViewById(R.id.editText);
@@ -108,6 +126,39 @@ public class DataKabaActivity extends AppCompatActivity {
         });
 
 
+        SensorRef.orderByChild("Date").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                model = dataSnapshot.getValue(Model.class);
+                arraylist.add(model);
+                adapter.notifyDataSetChanged();
+                size = arraylist.size();
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
         btn.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -131,99 +182,43 @@ public class DataKabaActivity extends AppCompatActivity {
                 }
 
                 else
+
                 {
+                    int i = 0;
+                    boolean find = false;
 
-                    itr = 0;
-                    nbr = 0;
-                    testD = 0;
+                    while (i < size && !find ){
 
+                        if(Date.getText().toString().equals(arraylist.get(i).getDate()) && component.getText().toString().equals(arraylist.get(i).getComponent())
+                                && (Float.valueOf(LAD.getText().toString())).toString().equals(arraylist.get(i).getLad().toString())
+                                && (Float.valueOf(poste.getText().toString())).toString().equals(arraylist.get(i).getPoste().toString())) {
 
-                    SensorRef.orderByChild("Date").addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            k = i;
+                            find = true;
 
-                            if(dataSnapshot.exists()){
+                        } else
 
+                            i++;
+                    }
 
-                                for (DataSnapshot childSnapshot: dataSnapshot.getChildren()) {
+                    if(find){
 
+                        final Intent intent = new Intent(DataKabaActivity.this, ShowDataKabaActivity.class);
 
-                                    final String key = childSnapshot.getKey();
+                        intent.putExtra("val1", LAD.getText().toString());
+                        intent.putExtra("val2", poste.getText().toString());
+                        intent.putExtra("val3", component.getText().toString());
+                        intent.putExtra("val4", Date.getText().toString());
+                        startActivity(intent);
 
-                                    String testlad = dataSnapshot.child(key).child("lad").getValue().toString();
-                                    String testposte = dataSnapshot.child(key).child("poste").getValue().toString();
-                                    String testcomponent = dataSnapshot.child(key).child("component").getValue().toString();
-                                    String testDate = dataSnapshot.child(key).child("Date").getValue().toString();
+                    } else {
 
-                                    if(testlad.equals(LAD.getText().toString())&&(testposte.equals(poste.getText().toString())&&(testcomponent.equals(component.getText().toString()))&&(testDate.equals(Date.getText().toString()))))
+                        Toast.makeText(DataKabaActivity.this, "Please verify data !", Toast.LENGTH_SHORT).show();
+                    }
 
-                                    nbr++;
+                }}
 
-                                    }
-
-                                for (DataSnapshot childSnapshot: dataSnapshot.getChildren()){
-
-                                    itr++;
-
-                                    final String key = childSnapshot.getKey();
-
-
-                                    String testlad = dataSnapshot.child(key).child("lad").getValue().toString();
-                                    String testposte = dataSnapshot.child(key).child("poste").getValue().toString();
-                                    String testcomponent = dataSnapshot.child(key).child("component").getValue().toString();
-                                    String testDate = dataSnapshot.child(key).child("Date").getValue().toString();
-
-
-                                    if(testlad.equals(LAD.getText().toString())&&(testposte.equals(poste.getText().toString())&&(testcomponent.equals(component.getText().toString()))&&(testDate.equals(Date.getText().toString())))){
-
-                                        testD++;
-                                        final Intent i = new Intent(DataKabaActivity.this,ShowDataKabaActivity.class);
-
-                                        i.putExtra("val1",LAD.getText().toString());
-                                        i.putExtra("val2",poste.getText().toString());
-                                        i.putExtra("val3",component.getText().toString());
-                                        i.putExtra("val4",dataSnapshot.child(key).child("nbre_pieces").getValue().toString());
-                                        i.putExtra("val5",dataSnapshot.child(key).child("variante").getValue().toString());
-                                        i.putExtra("val6",Date.getText().toString());
-                                        i.putExtra("val7",dataSnapshot.child(key).child("Time").getValue().toString());
-                                        String testTime = dataSnapshot.child(key).child("Time").getValue().toString();
-
-                                       if (Float.valueOf(dataSnapshot.child(key).child("nbre_pieces").getValue().toString())<16 && testD == nbr) {
-                                           String title = "Alerte LAD: "+ testlad+ " / Poste: "+ testposte+ " / "+testTime;
-                                           String message = testcomponent + " en manque de pièces !!";
-                                           createNotification(title, message);
-                                       }
-
-
-                                        if (testD == nbr) {
-                                            startActivity(i);
-                                            break;
-                                        }
-
-
-                                    }   else {
-
-                                        if(itr == dataSnapshot.getChildrenCount())
-
-                                            Toast.makeText(DataKabaActivity.this, "Please verify data !", Toast.LENGTH_SHORT).show();
-
-                                    }
-
-                                }
-                            }
-
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-
-
-                    });}}
         });
-
 
 
         SensorRefNotif.orderByChild("Date").limitToLast(1).addValueEventListener(new ValueEventListener() {
@@ -232,22 +227,25 @@ public class DataKabaActivity extends AppCompatActivity {
 
                 if(dataSnapshot.exists()){
 
-
                     for (DataSnapshot childSnapshot: dataSnapshot.getChildren()) {
 
                         final String key = childSnapshot.getKey();
-
                         String testlad = dataSnapshot.child(key).child("lad").getValue().toString();
                         String testposte = dataSnapshot.child(key).child("poste").getValue().toString();
                         String testcomponent = dataSnapshot.child(key).child("component").getValue().toString();
                         String testDate = dataSnapshot.child(key).child("Date").getValue().toString();
                         String testTime = dataSnapshot.child(key).child("Time").getValue().toString();
 
-                        if (Float.valueOf(dataSnapshot.child(key).child("nbre_pieces").getValue().toString())<16) {
-                            String title = "Alerte LAD: "+ testlad+ " / Poste: "+ testposte+ " / "+testTime;
-                            String message = testcomponent + " en manque de pièces !!";
-                            createNotification(title, message);
-                        }
+                        if (Float.valueOf(dataSnapshot.child(key).child("nbre_pieces").getValue().toString())<10) {
+
+                            title = "Alerte LAD: "+ testlad+ " / Poste: "+ testposte+ " / "+testTime;
+                            message = testcomponent + " en manque de pièces !!";
+                            NotifRef.child("Notification").setValue("true");
+
+                       } else
+
+                            NotifRef.child("Notification").setValue("false");
+
                     }
 
                 }
@@ -263,10 +261,30 @@ public class DataKabaActivity extends AppCompatActivity {
 
         });
 
+        NotifRef.child("Notification").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
+                if(dataSnapshot.exists()){
 
+                    String test = dataSnapshot.getValue().toString();
+
+                    if(test.equals("true"))
+                        createNotification(title, message);
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
     }
+
+
 
     public void createNotification(String title, String message) {
 
