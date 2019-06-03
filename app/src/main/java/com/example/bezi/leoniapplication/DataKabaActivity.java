@@ -79,7 +79,7 @@ public class DataKabaActivity extends AppCompatActivity {
         SensorRefNotif = FirebaseDatabase.getInstance().getReference().child("MyTestData");
         NotifRef = FirebaseDatabase.getInstance().getReference();
 
-        model = new Model();
+        //model = new Model();
         arraylist = new ArrayList<>();
         adapter = new ArrayAdapter<Model>(this, android.R.layout.simple_list_item_1, arraylist);
 
@@ -126,29 +126,28 @@ public class DataKabaActivity extends AppCompatActivity {
         });
 
 
-        SensorRef.orderByChild("Date").addChildEventListener(new ChildEventListener() {
+        SensorRef.orderByChild("Date").addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                model = dataSnapshot.getValue(Model.class);
-                arraylist.add(model);
-                adapter.notifyDataSetChanged();
+                for (DataSnapshot childSnapshot: dataSnapshot.getChildren()) {
+
+                    final String key = childSnapshot.getKey();
+
+                    String lad = dataSnapshot.child(key).child("lad").getValue().toString();
+                    String poste = dataSnapshot.child(key).child("poste").getValue().toString();
+                    String component = dataSnapshot.child(key).child("component").getValue().toString();
+                    String date = dataSnapshot.child(key).child("Date").getValue().toString();
+                    String time = dataSnapshot.child(key).child("Time").getValue().toString();
+                    String id = dataSnapshot.child(key).child("ID").getValue().toString();
+                    String quantity = dataSnapshot.child(key).child("nbre_pieces").getValue().toString();
+                    String variante = dataSnapshot.child(key).child("variante").getValue().toString();
+                    String kabaweight = dataSnapshot.child(key).child("kabaweight").getValue().toString();
+
+                    arraylist.add(new Model(date,time,component,variante,Float.valueOf(id),Float.valueOf(kabaweight),Float.valueOf(lad),Float.valueOf(quantity),Float.valueOf(poste)));
+                }
+
                 size = arraylist.size();
-
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
             }
 
@@ -249,8 +248,7 @@ public class DataKabaActivity extends AppCompatActivity {
                     }
 
                 }
-
-
+                
             }
 
             @Override
@@ -283,8 +281,6 @@ public class DataKabaActivity extends AppCompatActivity {
         });
 
     }
-
-
 
     public void createNotification(String title, String message) {
 
