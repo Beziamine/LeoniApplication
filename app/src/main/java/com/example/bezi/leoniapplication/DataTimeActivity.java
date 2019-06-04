@@ -3,20 +3,14 @@ package com.example.bezi.leoniapplication;
 import android.app.DatePickerDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -25,7 +19,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,11 +27,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 
-
-public class DataKabaActivity extends AppCompatActivity {
+public class DataTimeActivity extends AppCompatActivity {
 
     private Button btn ;
     private EditText LAD , poste , component , Date  ;
@@ -61,25 +51,16 @@ public class DataKabaActivity extends AppCompatActivity {
 
     private String title,message;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_data_kaba);
+        setContentView(R.layout.activity_data_time);
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            NotificationChannel channel = new NotificationChannel("Chanel_ID","Channel_Name",NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setDescription("Channel_Desc");
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(channel);
-        }
 
         SensorRef = FirebaseDatabase.getInstance().getReference().child("MyTestData");
         SensorRefNotif = FirebaseDatabase.getInstance().getReference().child("MyTestData");
-        NotifRef = FirebaseDatabase.getInstance().getReference();
 
-        //model = new Model();
+
         arraylist = new ArrayList<>();
         adapter = new ArrayAdapter<Model>(this, android.R.layout.simple_list_item_1, arraylist);
 
@@ -101,7 +82,7 @@ public class DataKabaActivity extends AppCompatActivity {
                 int month = calendar.get(Calendar.MONTH);
                 int year = calendar.get(Calendar.YEAR);
 
-                datePickerDialog = new DatePickerDialog(DataKabaActivity.this, new DatePickerDialog.OnDateSetListener() {
+                datePickerDialog = new DatePickerDialog(DataTimeActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int mYear, int mMonth, int mDay) {
 
@@ -165,19 +146,19 @@ public class DataKabaActivity extends AppCompatActivity {
 
                 if(TextUtils.isEmpty(LAD.getText().toString()))
                 {
-                    Toast.makeText(DataKabaActivity.this, "Please insert the LAD !", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DataTimeActivity.this, "Please insert the LAD !", Toast.LENGTH_SHORT).show();
                 }
                 if(TextUtils.isEmpty(poste.getText().toString()))
                 {
-                    Toast.makeText(DataKabaActivity.this, "Please insert the poste !", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DataTimeActivity.this, "Please insert the poste !", Toast.LENGTH_SHORT).show();
                 }
                 if(TextUtils.isEmpty(component.getText().toString()))
                 {
-                    Toast.makeText(DataKabaActivity.this, "Please insert the component !", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DataTimeActivity.this, "Please insert the component !", Toast.LENGTH_SHORT).show();
                 }
                 if(TextUtils.isEmpty(Date.getText().toString()))
                 {
-                    Toast.makeText(DataKabaActivity.this, "Please insert the Date !", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DataTimeActivity.this, "Please insert the Date !", Toast.LENGTH_SHORT).show();
                 }
 
                 else
@@ -202,7 +183,7 @@ public class DataKabaActivity extends AppCompatActivity {
 
                     if(find){
 
-                        final Intent intent = new Intent(DataKabaActivity.this, ShowDataKabaActivity.class);
+                        final Intent intent = new Intent(DataTimeActivity.this, ShowDataTimeActivity.class);
 
                         intent.putExtra("val1", LAD.getText().toString());
                         intent.putExtra("val2", poste.getText().toString());
@@ -212,89 +193,13 @@ public class DataKabaActivity extends AppCompatActivity {
 
                     } else {
 
-                        Toast.makeText(DataKabaActivity.this, "Please verify data !", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DataTimeActivity.this, "Please verify data !", Toast.LENGTH_SHORT).show();
                     }
 
                 }}
 
         });
-
-
-        SensorRefNotif.orderByChild("Date").limitToLast(1).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                if(dataSnapshot.exists()){
-
-                    for (DataSnapshot childSnapshot: dataSnapshot.getChildren()) {
-
-                        final String key = childSnapshot.getKey();
-                        String testlad = dataSnapshot.child(key).child("lad").getValue().toString();
-                        String testposte = dataSnapshot.child(key).child("poste").getValue().toString();
-                        String testcomponent = dataSnapshot.child(key).child("component").getValue().toString();
-                        String testDate = dataSnapshot.child(key).child("Date").getValue().toString();
-                        String testTime = dataSnapshot.child(key).child("Time").getValue().toString();
-
-                        if (Float.valueOf(dataSnapshot.child(key).child("nbre_pieces").getValue().toString())<10) {
-
-                            title = "Alerte LAD: "+ testlad+ " / Poste: "+ testposte+ " / "+testTime;
-                            message = testcomponent + " en manque de pièces !!";
-                            NotifRef.child("Notification").setValue("true");
-
-                       } else
-
-                            NotifRef.child("Notification").setValue("false");
-
-                    }
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-
-
-        });
-
-        NotifRef.child("Notification").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                if(dataSnapshot.exists()){
-
-                    String test = dataSnapshot.getValue().toString();
-
-                    if(test.equals("true"))
-                        createNotification(title, message);
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
     }
-
-    public void createNotification(String title, String message) {
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this,"Chanel_ID")
-                .setSmallIcon(R.drawable.ic_notifications_black_24dp)
-                .setContentTitle(title)
-                .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(1, builder.build());
-
-    }
-
-
-
 }
+
+

@@ -11,7 +11,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private CircleImageView b1,b2 ;
+    private CircleImageView b1,b2,b3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
         b1=(CircleImageView)findViewById(R.id.bt1);
         b2=(CircleImageView)findViewById(R.id.bt2);
+        b3=(CircleImageView)findViewById(R.id.bt3);
 
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -33,6 +34,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this, StatisticsActivity.class);
+                startActivity(i);
+            }
+        });
+
+        b3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainActivity.this, DataTimeActivity.class);
                 startActivity(i);
             }
         });
